@@ -22,6 +22,11 @@ Install-Module PSTelegramAPI -Scope CurrentUser
 
 ```
 Send-TelegramMessage -Message "Hello World"
+"Hello World" | Send-TelegramMessage
 ```
 
-NOTE: On the first run Telegram API will send the number you have provided a verification code, via Telegram not SMS. You can do it on any desktop, web or mobile client. It does not have to be on the device you run the script on. 
+### NOTE
+On the first run Telegram API will send the number you have provided a verification code, via Telegram not SMS. You can do it on any desktop, web or mobile client. It does not have to be on the device you run the script on.
+
+## License
+MIT License
