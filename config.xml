@@ -1,0 +1,8 @@
+<configuration>
+	<telegram apiId = "" apiHash = "" phone = "" />
+	<log path="telegram.log" />
+	<usernames>
+		<user>user1</user>
+		<user>user2</user>
+	</usernames>
+</configuration>
