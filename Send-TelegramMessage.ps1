@@ -57,7 +57,7 @@
             $TLPeer = $TLUserDialogs.Where({ $_.Peer.Username -eq $Username }).Peer
 
             # Send message to User
-            If($TLPeer -eq $null)
+            If($null -eq $TLPeer)
             {
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
@@ -77,8 +77,5 @@
     }
     End
     {
-        $TLConfigFile = $null;
-        $TLUserDialogs = $null;
-        $TLPeer = $null;
     }
 }
