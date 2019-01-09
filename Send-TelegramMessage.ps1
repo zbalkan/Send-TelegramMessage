@@ -61,7 +61,6 @@
             {
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
-                $TLLogMessage | Out-File $TLLogPath -Append
             }
             else
             {
@@ -71,11 +70,15 @@
                 
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate"
-                $TLLogMessage | Out-File $TLLogPath -Append
+                
             }
         }
     }
     End
     {
+        if($null -ne $TLLogMessage)
+        {
+            $TLLogMessage | Out-File $TLLogPath -Append
+        }
     }
 }
