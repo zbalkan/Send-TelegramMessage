@@ -27,26 +27,31 @@
         # Read configuration file
         $TLConfigFile = [XML](Get-Content -Path .\config.xml)
         $TLConfig = $TLConfigFile.configuration
+        Write-Verbose "Read configuration file"
 
         #Set API configuration values
         $TLApiId = $TLConfig.telegram.apiId
         $TLApiHash = $TLConfig.telegram.apiHash
         $TLPhone = $TLConfig.telegram.phone
+        Write-Verbose "Set Telegram API configuration values"
 
         # Read log file
         $TLLogPath = $TLConfig.log.path
+        Write-Verbose "Read log file path"
 
         # Import Telegram API Module
         Import-Module PSTelegramAPI
+        Write-Verbose "Imported PSTelegramAPI module"
 
         # Establish connection to Telegram
         $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone
-
+        Write-Verbose "Started Telegram Client"
     }
     Process
     {
         # Get List of User Dialogs
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
+        Write-Verbose "Read usernames from file"
 
         # Send message to each user
         $TLConfig.usernames | ForEach-Object { 
@@ -61,6 +66,7 @@
             {
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
+                Write-Warning "Peer not found."
             }
             else
             {
@@ -69,8 +75,8 @@
                 $SentDate = ((Get-Date 01.01.1970)+([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o");
                 
                 # Log the event
-                $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate"
-                
+                $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate."
+                Write-Verbose "Message sent to $Username at $SentDate."
             }
         }
     }
@@ -80,5 +86,6 @@
         {
             $TLLogMessage | Out-File $TLLogPath -Append
         }
+        Write-Verbose "Returning succesfully."
     }
 }
