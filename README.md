@@ -3,7 +3,7 @@
 A PowerShell Cmdlet to send messages using Telegram API
 
 ## Description
-The Cmdlet is based on [mskellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI). A config file (`config.xml`) is created for manageability causes.
+The Cmdlet is based on [Marc R Kellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI). A config file (`config.xml`) is created for manageability causes.
 A `dat` file is created after Telegram API verification. A log file is created on the first run.
 
 ## Requirements
