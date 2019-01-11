@@ -25,8 +25,7 @@
     Begin
     {
         # Read configuration file
-        $TLConfigFile = [XML](Get-Content -Path .\config.xml)
-        $TLConfig = $TLConfigFile.configuration
+        $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
         Write-Verbose "Read configuration file"
 
         #Set API configuration values
