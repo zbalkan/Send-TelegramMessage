@@ -1,4 +1,5 @@
 # Send-TelegramMessage
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fzbalkan%2FSend-TelegramMessage.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fzbalkan%2FSend-TelegramMessage?ref=badge_shield)
 
 A PowerShell Cmdlet to send messages using Telegram API
 
