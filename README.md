@@ -1,17 +1,16 @@
 # Send-TelegramMessage
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fzbalkan%2FSend-TelegramMessage.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fzbalkan%2FSend-TelegramMessage?ref=badge_shield)
 
-
 A PowerShell Cmdlet to send messages using Telegram API
 
 ## Description
-The Cmdlet is based on [mskellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI). A config file (`config.xml`) is created for manageability causes.
+The Cmdlet is based on [Marc R Kellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI). A config file (`config.xml`) is created for manageability causes.
 A `dat` file is created after Telegram API verification. A log file is created on the first run.
 
 ## Requirements
 * Telegram API is based on a phone number. So you will need a phone number dedicated to use for your notifications.
 * You need a Telegram API ID for your client. To obtain the the id and hash you should follow [Telegram API docs](https://core.telegram.org/api/obtaining_api_id)
-* [mskellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI) is needed:
+* [Marc R Kellerman](https://github.com/mkellerman)'s [PSTelegramAPI](https://github.com/mkellerman/PSTelegramAPI) is needed:
 ```
 Install-Module PSTelegramAPI -Scope CurrentUser
 ```

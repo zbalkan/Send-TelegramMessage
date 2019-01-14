@@ -11,6 +11,7 @@
    "Hello World" | Send-TelegramMessage
    #>
    function Send-TelegramMessage
+
    {
     [CmdletBinding()]
     Param
@@ -21,13 +22,12 @@
          Position=0)]
         [string]$Message
         )
-
     Begin
     {
         # Read configuration file
         $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
         Write-Verbose "Read configuration file"
-
+       
         #Set API configuration values
         $TLApiId = $TLConfig.telegram.apiId
         $TLApiHash = $TLConfig.telegram.apiHash
@@ -39,12 +39,26 @@
         Write-Verbose "Read log file path"
 
         # Import Telegram API Module
-        Import-Module PSTelegramAPI
-        Write-Verbose "Imported PSTelegramAPI module"
+        try
+        {
+            Import-Module PSTelegramAPI -ErrorAction Stop
+            Write-Verbose "Imported PSTelegramAPI module"
+        }
+        catch
+        {
+            Throw "PSTelegramAPI module cannot be found"
+        }
 
         # Establish connection to Telegram
-        $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone
-        Write-Verbose "Started Telegram Client"
+        try
+        {
+            $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone  -ErrorAction Stop
+            Write-Verbose "Started Telegram Client"
+        }
+        catch
+        {
+            Throw "Could not connected to Telegram. Check your internet connection and configuration."
+        }
     }
     Process
     {
@@ -53,8 +67,7 @@
         Write-Verbose "Read usernames from file"
 
         # Send message to each user
-        $TLConfig.usernames | ForEach-Object { 
-            
+        $TLConfig.usernames | ForEach-Object {
             $Username = $_.user
 
             # Find a specific User
@@ -70,9 +83,8 @@
             else
             {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
-
                 $SentDate = ((Get-Date 01.01.1970)+([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o");
-                
+             
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate."
                 Write-Verbose "Message sent to $Username at $SentDate."
