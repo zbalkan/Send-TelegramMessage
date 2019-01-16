@@ -95,7 +95,7 @@ function Send-TelegramMessage {
         }
         
         try {
-            $TLConfigfile = [XML](Get-Content -Path .\config.xml -ErrorAction Stop)
+            $TLConfigfile = [XML](Get-Content (Join-Path -Path $PSScriptRoot -ChildPath config.xml) -ErrorAction Stop)
             Write-Verbose "Read configuration file"
         }
         catch {
@@ -109,7 +109,7 @@ function Send-TelegramMessage {
         $TLPhone = $TLConfig.telegram.phone
         Write-Verbose "Set Telegram API configuration values"
         
-        $TLLogPath = $TLConfig.log.path
+        $TLLogPath = Join-Path -Path $PSScriptRoot -ChildPath $TLConfig.log.path
         Write-Verbose "Read log file path"
         
         try {
