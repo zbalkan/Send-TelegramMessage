@@ -75,7 +75,6 @@
             "$(Get-Date -Format o)`t|`t$Level`t|`t$Message" | Out-File $LogPath -Append
         }
 
-        # Read configuration file
         try {
             $TLConfigfile = [XML](Get-Content -Path .\config.xml -ErrorAction Stop)
             Write-Verbose "Read configuration file"
@@ -84,18 +83,16 @@
             Throw "Could not found configuration file. Make sure config.xml exists in the current directory."
         }
 
-        #Set API configuration values
+        # The values below are obtained from and will be consumed by Telegram API 
         $TLConfig = $TLConfigfile.configuration
         $TLApiId = $TLConfig.telegram.apiId
         $TLApiHash = $TLConfig.telegram.apiHash
         $TLPhone = $TLConfig.telegram.phone
         Write-Verbose "Set Telegram API configuration values"
 
-        # Read log file
         $TLLogPath = $TLConfig.log.path
         Write-Verbose "Read log file path"
 
-        # Import Telegram API Module
         try {
             Import-Module PSTelegramAPI -ErrorAction Stop
             Write-Verbose "Imported PSTelegramAPI module"
@@ -106,7 +103,6 @@
             Throw $TLLogMessage
         }
 
-        # Establish connection to Telegram
         try {
             $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone -ErrorAction Stop
             Write-Verbose "Started Telegram Client"
@@ -119,7 +115,6 @@
     }
     process {
 
-        # Creating Result property
         $Result = @{
             PhoneNumber = $TLPhone
             ApiId = $TLApiId
@@ -129,24 +124,19 @@
             SendReports = @()
         }
     
-        # Get List of User Dialogs
+        # Getting List of User Dialogs because peers (usernames) are required to be in contact list
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
         Write-Verbose "Read usernames from file"
 
-        # Send message to each user
         $TLConfig.usernames | ForEach-Object {
             $Username = $_.user
 
-            # Find a specific User
             $TLPeer = $TLUserDialogs.Where({ $_.Peer.Username -eq $Username }).Peer
 
-            # Send message to User
             if($null -eq $TLPeer) {
 
-                # Modify output
                 $Result.SendReports += "$Username : Failure"
             
-                # Log the event
                 $TLLogMessage = "Peer not found."
                 Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLLogPath
                 Write-Warning $TLLogMessage
@@ -155,17 +145,14 @@
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
                 $SentDate = ((Get-Date 01.01.1970)+([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o")
 
-                # Modify output
                 $Result.SendReports += "$Username : Success"
 
-                # Log the event
                 $TLLogMessage = "Message sent to $Username at $SentDate."
                 Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLLogPath
                 Write-Verbose $TLLogMessage
             }
         }
         
-        # Return output
         return New-Object -Property $Result -TypeName psobject
     }
     end { }
