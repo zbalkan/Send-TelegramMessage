@@ -10,20 +10,16 @@
 .EXAMPLE
    "Hello World" | Send-TelegramMessage
    #>
-   function Send-TelegramMessage
-
-   {
+   function Send-TelegramMessage {
     [CmdletBinding()]
-    Param
-    (
+    Param (
         # Message text to send via Telegram API
         [Parameter(Mandatory=$true,
          ValueFromPipeline=$true,
          Position=0)]
         [string]$Message
         )
-    begin
-    {
+    begin {
         # Read configuration file
         $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
         Write-Verbose "Read configuration file"
@@ -39,29 +35,24 @@
         Write-Verbose "Read log file path"
 
         # Import Telegram API Module
-        try
-        {
+        try {
             Import-Module PSTelegramAPI -ErrorAction Stop
             Write-Verbose "Imported PSTelegramAPI module"
         }
-        catch
-        {
+        catch {
             Throw "PSTelegramAPI module cannot be found"
         }
 
         # Establish connection to Telegram
-        try
-        {
+        try {
             $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone  -ErrorAction Stop
             Write-Verbose "Started Telegram Client"
         }
-        catch
-        {
+        catch {
             Throw "Could not connected to Telegram. Check your internet connection and configuration."
         }
     }
-    process
-    {
+    process {
         # Get List of User Dialogs
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
         Write-Verbose "Read usernames from file"
@@ -74,14 +65,12 @@
             $TLPeer = $TLUserDialogs.Where({ $_.Peer.Username -eq $Username }).Peer
 
             # Send message to User
-            if($null -eq $TLPeer)
-            {
+            if($null -eq $TLPeer) {
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
                 Write-Warning "Peer not found."
             }
-            else
-            {
+            else {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
                 $SentDate = ((Get-Date 01.01.1970)+([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o");
              
@@ -91,12 +80,8 @@
             }
         }
     }
-    end
-    {
-        if($null -ne $TLLogMessage)
-        {
-            $TLLogMessage | Out-File $TLLogPath -Append
-        }
+    end {
+        if($null -ne $TLLogMessage) { $TLLogMessage | Out-File $TLLogPath -Append }
         Write-Verbose "Returning succesfully."
     }
 }
