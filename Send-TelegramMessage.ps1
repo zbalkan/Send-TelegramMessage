@@ -23,11 +23,16 @@
     begin {
     
         # Read configuration file
-        $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
-        Write-Verbose "Read configuration file"
+        try {
+            $TLConfigfile = [XML](Get-Content -Path .\config.xml -ErrorAction Stop)
+            Write-Verbose "Read configuration file"
+        }
+        catch {
+            Throw "Could not found configuration file. Make sure config.xml exists in the current directory."
+        }
 
         #Set API configuration values
-        $TLApiId = $TLConfig.telegram.apiId
+        $TLConfig = $TLConfigfile.configuration
         $TLApiHash = $TLConfig.telegram.apiHash
         $TLPhone = $TLConfig.telegram.phone
         Write-Verbose "Set Telegram API configuration values"
