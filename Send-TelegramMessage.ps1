@@ -1,14 +1,33 @@
 function Send-TelegramMessage {
     <#
-    .Synopsis
+    .SYNOPSIS
     Send text messages using Telegram API
+
     .DESCRIPTION
     It's a helpful source for system administrators to create Telegram messages using PowerShell. It's a good tool 
     when monitoring solution does not provide integration or when there is not an advanced monitoring tool needed.
+    
+    .PARAMETER Message
+    Message text to send via Telegram API. Plain text string for now.
+
+    .INPUTS
+    Message parameter can be pipelined.
+
+    .OUTPUTS
+    Most of the output repots are in configuration files. Others are results of message sending attempts.
+    PhoneNumber : From config.xml 
+    ApiId       : From config.xml
+    ApiHash     : From config.xml
+    LogPath     : From config.xml
+    Peers       : From config.xml
+    SendReports : Results of message sending attempts
+
     .RELATED LINKS
     https://github.com/zbalkan/Send-TelegramMessage
+
     .EXAMPLE
     Send-TelegramMessage -Message "Hello World"
+
     .EXAMPLE
     "Hello World" | Send-TelegramMessage
     #>
