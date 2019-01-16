@@ -15,15 +15,15 @@
     param (
         # Message text to send via Telegram API
         [Parameter(Mandatory=$true,
-         ValueFromPipeline=$true,
-         Position=0)]
+           ValueFromPipeline=$true,
+           Position=0)]
         [string]$Message
         )
     begin {
         # Read configuration file
         $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
         Write-Verbose "Read configuration file"
-       
+
         #Set API configuration values
         $TLApiId = $TLConfig.telegram.apiId
         $TLApiHash = $TLConfig.telegram.apiHash
@@ -73,7 +73,7 @@
             else {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
                 $SentDate = ((Get-Date 01.01.1970)+([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o");
-             
+
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate."
                 Write-Verbose "Message sent to $Username at $SentDate."
