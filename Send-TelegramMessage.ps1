@@ -12,7 +12,7 @@
    #>
    function Send-TelegramMessage {
     [CmdletBinding()]
-    Param (
+    param (
         # Message text to send via Telegram API
         [Parameter(Mandatory=$true,
          ValueFromPipeline=$true,
