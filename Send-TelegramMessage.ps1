@@ -2,7 +2,7 @@
 .Synopsis
    Send text messages using Telegram API
 .DESCRIPTION
-   It's a helpful source for system administrators to create Telegram messages using Powershell. It's a good tool when monitoring solution does not provide integration or when there is not an advanced monitoring tool needed.
+   It's a helpful source for system administrators to create Telegram messages using Powershell. It's good to 
 .RELATED LINKS
     https://github.com/zbalkan/Send-TelegramMessage
 .EXAMPLE
@@ -22,7 +22,7 @@
          Position=0)]
         [string]$Message
         )
-    Begin
+    begin
     {
         # Read configuration file
         $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
@@ -60,7 +60,7 @@
             Throw "Could not connected to Telegram. Check your internet connection and configuration."
         }
     }
-    Process
+    process
     {
         # Get List of User Dialogs
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
@@ -74,7 +74,7 @@
             $TLPeer = $TLUserDialogs.Where({ $_.Peer.Username -eq $Username }).Peer
 
             # Send message to User
-            If($null -eq $TLPeer)
+            if($null -eq $TLPeer)
             {
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
@@ -91,7 +91,7 @@
             }
         }
     }
-    End
+    end
     {
         if($null -ne $TLLogMessage)
         {
