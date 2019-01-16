@@ -128,18 +128,36 @@ function Send-TelegramMessage {
             }
         }
 
+        function Import-TLModule() {
+            <#
+            .Synopsis
+            Imports PsTelegramAPI module
+            .DESCRIPTION
+            Imports PsTelegramAPI module and throws exception if it cannot find
+            .EXAMPLE
+            Import-TLModule
+            .INPUTS
+            No inputs
+            .OUTPUTS
+            No output.
+            .COMPONENT
+            The component this cmdlet belongs to Send-TelegramMessage cmdlet
+            #>
+            [CmdletBinding()]
+            param()
+            try {
+                Import-Module PSTelegramAPI -ErrorAction Stop      
+            }
+            catch {
+                throw "PSTelegramAPI module cannot be found."
+            }
+        }
+
         $TLConfig = Get-TLConfiguration
         Write-Verbose "Read configuration file"
 
-        try {
-            Import-Module PSTelegramAPI -ErrorAction Stop
-            Write-Verbose "Imported PSTelegramAPI module"
-        }
-        catch {
-            $TLLogMessage = "PSTelegramAPI module cannot be found."
-            Write-Log -Message $TLLogMessage -Level ERROR -LogPath $TLConfig.LogPath
-            throw $TLLogMessage
-        }
+        Import-TLModule
+        Write-Verbose "Imported PSTelegramAPI module"
 
         try {
             $TLClient = New-TLClient -apiId $TLConfig.ApiId -apiHash $TLConfig.ApiHash -phoneNumber $TLConfig.Phone -ErrorAction Stop
