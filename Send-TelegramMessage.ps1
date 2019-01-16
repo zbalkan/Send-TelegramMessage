@@ -23,7 +23,58 @@
         $Message
         )
     begin {
-    
+    # Define functions
+
+        <#
+        .Synopsis
+           Writes message to log file
+        .DESCRIPTION
+           Log file path, log message and severity level shall be given as parameters.
+           Log rotation or any other advanced log solution is not defined.
+           Log time is defined as ISO8186 standard.
+        .EXAMPLE
+           # First argument is implicitly defined Message parameter. Level is INFO by default.
+           Write-Log "An event occured" -LogPath "telegram.log"
+        .EXAMPLE
+           Write-Log "An alert occured" -Level WARNING -LogPath "telegram.log"
+        .EXAMPLE
+           Write-Log "An error occured" -Level ERROR -LogPath "telegram.log"
+        .INPUTS
+           Message: Message to log as string
+           Level: INFO, WARNING and ERROR. INFO is default.
+           LogPath: Any text file path to append log message.
+        .OUTPUTS
+           No output.
+        .NOTES
+           Log format: ISO8186 DateTime | Severity Level | Message
+        .COMPONENT
+           The component this cmdlet belongs to Send-TelegramMessage cmdlet
+        #>
+        function Write-Log() {
+            [CmdletBinding()]
+            param(
+                [Parameter(Mandatory=$true, Position = 0, ValueFromPipeline=$true)]
+                [ValidateNotNull()]
+                [ValidateNotNullOrEmpty()]
+                [String]
+                $Message,
+
+                [Parameter(Mandatory=$false, Position = 1)]
+                [ValidateNotNull()]
+                [ValidateNotNullOrEmpty()]
+                [ValidateSet("INFO", "WARNING", "ERROR")]
+                [String]
+                $Level = "INFO",
+
+                [Parameter(Mandatory=$true, Position = 2)]
+                [ValidateNotNull()]
+                [ValidateNotNullOrEmpty()]
+                [String]
+                $LogPath
+            )
+            "$(Get-Date -Format o)`t|`t$Level`t|`t$Message" | Out-File $LogPath -Append
+        }
+
         # Read configuration file
         try {
             $TLConfigfile = [XML](Get-Content -Path .\config.xml -ErrorAction Stop)
@@ -50,7 +101,9 @@
             Write-Verbose "Imported PSTelegramAPI module"
         }
         catch {
-            Throw "PSTelegramAPI module cannot be found"
+            $TLLogMessage = "PSTelegramAPI module cannot be found."
+            Write-Log -Message $TLLogMessage -Level ERROR -LogPath $TLLogPath
+            Throw $TLLogMessage
         }
 
         # Establish connection to Telegram
@@ -59,7 +112,9 @@
             Write-Verbose "Started Telegram Client"
         }
         catch {
-            Throw "Could not connect to Telegram. Check your network connection and configuration."
+            $TLLogMessage = "Could not connect to Telegram. Check your network connection and configuration."
+            Write-Log -Message $TLLogMessage -Level ERROR -LogPath $TLLogPath
+            Throw $TLLogMessage
         }
     }
     process {
@@ -92,8 +147,9 @@
                 $Result.SendReports += "$Username : Failure"
             
                 # Log the event
-                $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
-                Write-Warning "Peer not found."
+                $TLLogMessage = "Peer not found."
+                Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLLogPath
+                Write-Warning $TLLogMessage
             }
             else {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
@@ -103,16 +159,14 @@
                 $Result.SendReports += "$Username : Success"
 
                 # Log the event
-                $TLLogMessage = "$(Get-Date -Format o)`t|`tINFO`t|`tMessage sent to $Username at $SentDate."
-                Write-Verbose "Message sent to $Username at $SentDate."
+                $TLLogMessage = "Message sent to $Username at $SentDate."
+                Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLLogPath
+                Write-Verbose $TLLogMessage
             }
         }
         
         # Return output
         return New-Object -Property $Result -TypeName psobject
     }
-    end {
-        if($null -ne $TLLogMessage) { $TLLogMessage | Out-File $TLLogPath -Append }
-        Write-Verbose "Returning successfully."
-    }
+    end { }
 }
