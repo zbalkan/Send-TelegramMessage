@@ -99,7 +99,7 @@ function Send-TelegramMessage {
             Write-Verbose "Read configuration file"
         }
         catch {
-            Throw "Could not found configuration file. Make sure config.xml exists in the current directory."
+            throw "Could not found configuration file. Make sure config.xml exists in the current directory."
         }
         
         # The values below are obtained from and will be consumed by Telegram API 
@@ -119,7 +119,7 @@ function Send-TelegramMessage {
         catch {
             $TLLogMessage = "PSTelegramAPI module cannot be found."
             Write-Log -Message $TLLogMessage -Level ERROR -LogPath $TLLogPath
-            Throw $TLLogMessage
+            throw $TLLogMessage
         }
         
         try {
@@ -129,7 +129,7 @@ function Send-TelegramMessage {
         catch {
             $TLLogMessage = "Could not connect to Telegram. Check your network connection and configuration."
             Write-Log -Message $TLLogMessage -Level ERROR -LogPath $TLLogPath
-            Throw $TLLogMessage
+            throw $TLLogMessage
         }
     }
     process {
