@@ -18,6 +18,7 @@
     
         # Message text to send via Telegram API
         [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
+        [ValidateNotNullOrEmpty()]
         [string]
         $Message
         )
