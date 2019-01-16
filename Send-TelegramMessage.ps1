@@ -47,7 +47,7 @@
 
         # Establish connection to Telegram
         try {
-            $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone  -ErrorAction Stop
+            $TLClient = New-TLClient -apiId $TLApiId -apiHash $TLApiHash -phoneNumber $TLPhone -ErrorAction Stop
             Write-Verbose "Started Telegram Client"
         }
         catch {
