@@ -2,7 +2,8 @@
 .Synopsis
    Send text messages using Telegram API
 .DESCRIPTION
-   It's a helpful source for system administrators to create Telegram messages using PowerShell. It's a good tool when monitoring solution does not provide integration or when there is not an advanced monitoring tool needed.
+   It's a helpful source for system administrators to create Telegram messages using PowerShell. It's a good tool 
+   when monitoring solution does not provide integration or when there is not an advanced monitoring tool needed.
 .RELATED LINKS
     https://github.com/zbalkan/Send-TelegramMessage
 .EXAMPLE
