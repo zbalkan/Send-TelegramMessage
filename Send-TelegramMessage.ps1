@@ -14,12 +14,14 @@
    function Send-TelegramMessage {
     [CmdletBinding()]
     param (
+    
         # Message text to send via Telegram API
         [Parameter(Mandatory=$true, ValueFromPipeline=$true, Position=0)]
         [string]
         $Message
         )
     begin {
+    
         # Read configuration file
         $TLConfig = ([XML](Get-Content -Path .\config.xml)).configuration
         Write-Verbose "Read configuration file"
@@ -53,6 +55,7 @@
         }
     }
     process {
+    
         # Get List of User Dialogs
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
         Write-Verbose "Read usernames from file"
@@ -66,6 +69,7 @@
 
             # Send message to User
             if($null -eq $TLPeer) {
+            
                 # Log the event
                 $TLLogMessage = "$(Get-Date -Format o)`t|`tWARNING`t|`tPeer not found."
                 Write-Warning "Peer not found."
