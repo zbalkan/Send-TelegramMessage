@@ -180,7 +180,7 @@ function Send-TelegramMessage {
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
         Write-Verbose "Read usernames from file"
 
-        $TLConfig.usernames | ForEach-Object {
+        $TLConfig.Peers | ForEach-Object {
             $Username = $_.user
 
             $TLPeer = $TLUserDialogs.Where( { $_.Peer.Username -eq $Username }).Peer
@@ -188,7 +188,7 @@ function Send-TelegramMessage {
             if ($null -eq $TLPeer) {
                 $Result.SendReports += "$Username : Failure"
                 $TLLogMessage = "Peer not found."
-                Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLLogPath
+                Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLConfig.LogPath
                 Write-Warning $TLLogMessage
             }
             else {
@@ -197,11 +197,11 @@ function Send-TelegramMessage {
 
                 $Result.SendReports += "$Username : Success"
                 $TLLogMessage = "Message sent to $Username at $SentDate."
-                Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLLogPath
+                Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLConfig.LogPath
                 Write-Verbose $TLLogMessage
             }
         }
-        return New-Object -Property $Result -TypeName psobject
+        return New-Object -Property $Result -TypeName psobject | Format-List
     }
     end { }
 }
