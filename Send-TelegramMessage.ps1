@@ -2,32 +2,32 @@ function Send-TelegramMessage {
     <#
     .SYNOPSIS
     Send text messages using Telegram API
-
+    
     .DESCRIPTION
     It's a helpful source for system administrators to create Telegram messages using PowerShell. It's a good tool 
     when monitoring solution does not provide integration or when there is not an advanced monitoring tool needed.
-
+    
     .PARAMETER Message
     Message text to send via Telegram API. Plain text string for now.
-
+    
     .INPUTS
     Message parameter can be pipelined.
-
+    
     .OUTPUTS
     Most of the output reports are in configuration files. Others are results of message sending attempts.
     Configuration : PS Object containing configuration data
     SendReports : Results of message sending attempts
-
+    
     .EXAMPLE
     Send-TelegramMessage -Message "Hello World"
-
+    
     .EXAMPLE
     "Hello World" | Send-TelegramMessage
     #>
     [CmdletBinding()]
     [OutputType([psobject])]
     param (
-
+    
     # Message text to send via Telegram API
     [Parameter(Mandatory = $true, ValueFromPipeline = $true, Position = 0)]
     [ValidateNotNullOrEmpty()]
@@ -36,7 +36,7 @@ function Send-TelegramMessage {
     )
     begin {
         # Define functions
-
+        
         function Write-Log() {
             <#
             .Synopsis
@@ -70,14 +70,14 @@ function Send-TelegramMessage {
             [ValidateNotNullOrEmpty()]
             [String]
             $Message,
-  
+            
             [Parameter(Mandatory = $false, Position = 1)]
             [ValidateNotNull()]
             [ValidateNotNullOrEmpty()]
             [ValidateSet("INFO", "WARNING", "ERROR")]
             [String]
             $Level = "INFO",
-
+            
             [Parameter(Mandatory = $true, Position = 2)]
             [ValidateNotNull()]
             [ValidateNotNullOrEmpty()]
@@ -86,7 +86,7 @@ function Send-TelegramMessage {
             )
             "$(Get-Date -Format o)`t|`t$Level`t|`t$Message" | Out-File $LogPath -Append
         }
-
+        
         function Get-TLConfiguration(){
             <#
             .Synopsis
@@ -118,7 +118,7 @@ function Send-TelegramMessage {
                         ApiHash = $Content.telegram.apiHash
                         Phone = $Content.telegram.phone
                         LogPath = Join-Path -Path $PSScriptRoot -ChildPath $Content.log.path
-                        Peers = $Content.usernames 
+                        Peers = $Content.recipients
                     }
                     return New-Object -Property $Config -TypeName psobject
                 }
@@ -127,7 +127,7 @@ function Send-TelegramMessage {
                 }
             }
         }
-
+        
         function Import-TLModule() {
             <#
             .Synopsis
@@ -152,13 +152,13 @@ function Send-TelegramMessage {
                 throw "PSTelegramAPI module cannot be found."
             }
         }
-
+        
         $TLConfig = Get-TLConfiguration
         Write-Verbose "Read configuration file"
-
+        
         Import-TLModule
         Write-Verbose "Imported PSTelegramAPI module"
-
+        
         try {
             $TLClient = New-TLClient -apiId $TLConfig.ApiId -apiHash $TLConfig.ApiHash -phoneNumber $TLConfig.Phone -ErrorAction Stop
             Write-Verbose "Started Telegram Client"
@@ -170,23 +170,29 @@ function Send-TelegramMessage {
         }
     }
     process {
-
+        
         $Result = @{
             Configuration = $TLConfig
             SendReports = @()
         }
-
+        
         # Getting List of User Dialogs because peers (usernames) are required to be in contact list
         $TLUserDialogs = Get-TLUserDialogs -TLClient $TLClient
         Write-Verbose "Read usernames from file"
+        
+        $TLConfig.Peers.ChildNodes | ForEach-Object {
+            $RecipientType = $_.Attributes.FirstChild.Value
+            $RecipientName = $_.FirstChild.Value
 
-        $TLConfig.Peers | ForEach-Object {
-            $Username = $_.user
 
-            $TLPeer = $TLUserDialogs.Where( { $_.Peer.Username -eq $Username }).Peer
-
+            if($RecipientType -contains "user") {
+                $TLPeer = $TLUserDialogs.Where({$null -ne $_.Peer.Username }).Where( { $_.Peer.Username -eq $RecipientName }).Peer
+            } elseif($RecipientType -contains "group") {
+                $TLPeer = $TLUserDialogs.Where({$null -eq $_.Peer.Username }).Where( { $_.Peer.Title -eq $RecipientName }).Peer
+            }
+            
             if ($null -eq $TLPeer) {
-                $Result.SendReports += "$Username : Failure"
+                $Result.SendReports += "$RecipientName : Failure"
                 $TLLogMessage = "Peer not found."
                 Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLConfig.LogPath
                 Write-Warning $TLLogMessage
@@ -194,9 +200,9 @@ function Send-TelegramMessage {
             else {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
                 $SentDate = ((Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o")
-
-                $Result.SendReports += "$Username : Success"
-                $TLLogMessage = "Message sent to $Username at $SentDate."
+                
+                $Result.SendReports += "$RecipientName : Success"
+                $TLLogMessage = "Message sent to $RecipientName at $SentDate."
                 Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLConfig.LogPath
                 Write-Verbose $TLLogMessage
             }
