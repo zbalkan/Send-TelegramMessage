@@ -18,7 +18,7 @@ Install-Module PSTelegramAPI -Scope CurrentUser
 ## Usage
 1. Download the files to any directory you like.
 2. After you obtained the credentials from Telegram API, just copy and paste to the `config.xml` file.
-3. Type the Telegram usernames of people you want to notify in `usernames` part of config. Since Telegram API let's you send messages to your Telegram contacts, you need to add the users on any client in order to be used by the script.
+3. Type the Telegram usernames of people and/or titles of groups you want to notify in `recipients` part of config. Since Telegram API let's you send messages to your Telegram contacts, you need to add the users on any client in order to be used by the script.
 4. You are good to go. Just type the command and parameters like the example below.
 
 ```
