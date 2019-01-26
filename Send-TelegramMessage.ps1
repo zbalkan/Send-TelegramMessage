@@ -113,12 +113,21 @@ function Send-TelegramMessage {
             process{
                 try {
                     $Content =  ([XML](Get-Content (Join-Path -Path $PSScriptRoot -ChildPath config.xml) -ErrorAction Stop)).configuration
+                    
+                    $peers = @()
+                    $Content.recipients.ChildNodes | ForEach-Object {
+                        $peer = @{
+                            Name = $_.FirstChild.Value;
+                            Type = $_.Attributes.FirstChild.Value;
+                        }
+                        $peers += [PSCustomObject]$peer
+                    }
                     $Config = @{
                         ApiId = $Content.telegram.apiId
                         ApiHash = $Content.telegram.apiHash
                         Phone = $Content.telegram.phone
                         LogPath = Join-Path -Path $PSScriptRoot -ChildPath $Content.log.path
-                        Peers = $Content.recipients.ChildNodes
+                        Peers = $peers
                     }
                     return New-Object -Property $Config -TypeName psobject
                 }
@@ -153,7 +162,7 @@ function Send-TelegramMessage {
             }
         }
         
-        $TLConfig = Get-TLConfiguration
+        $TLConfig = Get-TLConfiguration -ErrorAction Stop
         Write-Verbose "Read configuration file"
         
         Import-TLModule
@@ -181,18 +190,15 @@ function Send-TelegramMessage {
         Write-Verbose "Read usernames from file"
         
         $TLConfig.Peers | ForEach-Object {
-            $RecipientType = $_.Attributes.FirstChild.Value
-            $RecipientName = $_.FirstChild.Value
-
-
-            if($RecipientType -contains "user") {
-                $TLPeer = $TLUserDialogs.Where({$null -ne $_.Peer.Username }).Where( { $_.Peer.Username -eq $RecipientName }).Peer
-            } elseif($RecipientType -contains "group") {
-                $TLPeer = $TLUserDialogs.Where({$null -eq $_.Peer.Username }).Where( { $_.Peer.Title -eq $RecipientName }).Peer
+            $Recipient = $_   
+            if($Recipient.Type -contains "user") {
+                $TLPeer = $TLUserDialogs.Where( { $_.Peer.Username -eq $Recipient.Name } ).Peer
+            } elseif($Recipient.Type -contains "group") {
+                $TLPeer = $TLUserDialogs.Where( { $_.Peer.Title -eq $Recipient.Name } ).Peer
             }
             
             if ($null -eq $TLPeer) {
-                $Result.SendReports += "$RecipientName : Failure"
+                $Result.SendReports += "$($Recipient.Name) : Failure"
                 $TLLogMessage = "Peer not found."
                 Write-Log -Message $TLLogMessage -Level WARNING -LogPath $TLConfig.LogPath
                 Write-Warning $TLLogMessage
@@ -201,13 +207,13 @@ function Send-TelegramMessage {
                 $TelegramMessage = Invoke-TLSendMessage -TLClient $TLClient -TLPeer $TLPeer -Message $Message
                 $SentDate = ((Get-Date 01.01.1970) + ([System.TimeSpan]::fromseconds($TelegramMessage.date))).ToString("o")
                 
-                $Result.SendReports += "$RecipientName : Success"
-                $TLLogMessage = "Message sent to $RecipientName at $SentDate."
+                $Result.SendReports += "$($Recipient.Name) : Success"
+                $TLLogMessage = "Message sent to $($Recipient.Name) at $SentDate."
                 Write-Log -Message $TLLogMessage -Level INFO -LogPath $TLConfig.LogPath
                 Write-Verbose $TLLogMessage
             }
         }
-        return New-Object -Property $Result -TypeName psobject | Format-List
+        return New-Object -Property $Result -TypeName psobject
     }
     end { }
 }
